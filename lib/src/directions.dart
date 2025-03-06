@@ -14,41 +14,74 @@ part 'directions.response.dart';
 
 /// This service is used to calculate route between two points
 class DirectionsService {
-  static const _directionApiUrl =
-      'https://maps.googleapis.com/maps/api/directions/json';
+  static const _routesApiUrl =
+      'https://routes.googleapis.com/directions/v2:computeRoutes';
 
   static String? _apiKey;
 
-  /// Initializer of [GoogleMap].
-  ///
-  /// `Required` if `Directions API` on `Mobile device` will be needed.
-  /// For other cases, could be ignored.
+  /// Initializes [DirectionsService] with an API key.
   static void init(String apiKey) => _apiKey = apiKey;
 
-  /// Gets an google API key
+  /// Gets the API key
   static String? get apiKey => _apiKey;
 
   /// Calculates route between two points.
-  ///
-  /// `request` argument contains origin and destination points
-  /// and also settings for route calculation.
-  ///
-  /// `callback` argument will be called when route calculations finished.
   Future<void> route(
     DirectionsRequest request,
     void Function(DirectionsResult, DirectionsStatus?) callback,
   ) async {
-    final url = '$_directionApiUrl${request.toString()}&key=$apiKey';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode != 200) {
-      throw Exception(
-          '${response.statusCode} (${response.reasonPhrase}), uri = ${response.request!.url}');
+    if (_apiKey == null) {
+      throw Exception('Google Maps API key is not initialized.');
     }
 
-    final result = DirectionsResult.fromMap(json.decode(response.body));
+    final headers = {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': _apiKey!,
+      'X-Goog-FieldMask':
+          'routes.legs.steps.startLocation,routes.legs.steps.navigationInstruction'
+    };
 
-    callback(result, result.status);
+    final body = jsonEncode({
+      'origin': {
+        'location': {
+          'latLng': {
+            'latitude': request.origin.latitude,
+            'longitude': request.origin.longitude
+          }
+        }
+      },
+      'destination': {
+        'location': {
+          'latLng': {
+            'latitude': request.destination.latitude,
+            'longitude': request.destination.longitude
+          }
+        }
+      },
+      'travelMode': request.travelMode.toString(),
+      'computeAlternativeRoutes': false,
+      'routeModifiers': {'avoidTolls': false, 'avoidHighways': false},
+      'languageCode': 'en-US',
+      'units': 'METRIC'
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(_routesApiUrl),
+        headers: headers,
+        body: body,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            '${response.statusCode} (${response.reasonPhrase}), uri = ${_routesApiUrl}');
+      }
+
+      final result = DirectionsResult.fromMap(json.decode(response.body));
+      callback(result, result.status);
+    } catch (e) {
+      print('Error fetching directions: $e');
+    }
   }
 }
 
@@ -176,6 +209,7 @@ class TravelMode {
   int get hashCode => _name.hashCode;
 
   @override
+  // ignore: non_nullable_equals_parameter
   bool operator ==(dynamic other) =>
       other is TravelMode && _name == other._name;
 

@@ -1494,6 +1494,7 @@ class DirectionsStatus {
   int get hashCode => _name.hashCode;
 
   @override
+  // ignore: non_nullable_equals_parameter
   bool operator ==(dynamic other) =>
       other is DirectionsStatus && _name == other._name;
 
@@ -1589,6 +1590,7 @@ class VehicleType {
   int get hashCode => _name.hashCode;
 
   @override
+  // ignore: non_nullable_equals_parameter
   bool operator ==(dynamic other) =>
       other is VehicleType && _name == other._name;
 

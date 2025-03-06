@@ -9,7 +9,7 @@ void main() {
 
   final directionsService = DirectionsService();
 
-  final request = DirectionsRequest(
+  const request = DirectionsRequest(
     origin: 'New York',
     destination: 'San Francisco',
     travelMode: TravelMode.driving,
