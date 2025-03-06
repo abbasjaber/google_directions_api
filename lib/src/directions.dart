@@ -58,7 +58,10 @@ class DirectionsService {
           }
         }
       },
-      'travelMode': request.travelMode.toString(),
+      'travelMode': request.travelMode
+          .toString()
+          .split('.')
+          .last, // Use only the name of the enum
       'computeAlternativeRoutes': false,
       'routeModifiers': {'avoidTolls': false, 'avoidHighways': false},
       'languageCode': 'en-US',
@@ -72,9 +75,11 @@ class DirectionsService {
         body: body,
       );
 
+      print('Request Body: $body');
+
       if (response.statusCode != 200) {
         throw Exception(
-            '${response.statusCode} (${response.reasonPhrase}), uri = ${_routesApiUrl}');
+            '${response.statusCode} (${response.reasonPhrase}), uri = $_routesApiUrl');
       }
 
       final result = DirectionsResult.fromMap(json.decode(response.body));
