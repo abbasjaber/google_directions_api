@@ -47,7 +47,9 @@ class DirectionsResult {
             ?.map((waypoint) =>
                 GeocodedWaypoint.fromMap(waypoint as Map<String, dynamic>))
             .toList(),
-        status: map['status'] != null ? DirectionsStatus(map['status']) : null,
+        status: map['reasonPhrase'] != null
+            ? DirectionsStatus(map['reasonPhrase'])
+            : null,
         errorMessage: map['error_message'] as String?,
         availableTravelModes: (map['available_travel_modes'] as List?)
             ?.map((mode) => TravelMode(mode as String))
