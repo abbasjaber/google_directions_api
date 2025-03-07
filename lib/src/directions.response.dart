@@ -67,7 +67,7 @@ class Leg {
 
 class Step {
   final Coordinates startLocation;
-  final String navigationInstruction;
+  final NavigationInstruction navigationInstruction;
 
   Step({
     required this.startLocation,
@@ -77,7 +77,8 @@ class Step {
   factory Step.fromMap(Map<String, dynamic> map) {
     return Step(
       startLocation: Coordinates.fromMap(map['startLocation']['latLng']),
-      navigationInstruction: map['navigationInstruction'] as String,
+      navigationInstruction:
+          NavigationInstruction.fromMap(map['navigationInstruction']),
     );
   }
 }
@@ -92,6 +93,20 @@ class Coordinates {
     return Coordinates(
       latitude: map['latitude'],
       longitude: map['longitude'],
+    );
+  }
+}
+
+class NavigationInstruction {
+  final String maneuver;
+  final String instructions;
+
+  NavigationInstruction({required this.maneuver, required this.instructions});
+
+  factory NavigationInstruction.fromMap(Map<String, dynamic> map) {
+    return NavigationInstruction(
+      maneuver: map['maneuver'],
+      instructions: map['instructions'],
     );
   }
 }
