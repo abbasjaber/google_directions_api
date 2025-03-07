@@ -126,10 +126,12 @@ class DirectionsRoute {
   });
 
   factory DirectionsRoute.fromMap(Map<String, dynamic> map) => DirectionsRoute(
-        bounds: GeoCoordBounds(
-          northeast: _getGeoCoordFromMap(map['bounds']['northeast'])!,
-          southwest: _getGeoCoordFromMap(map['bounds']['southwest'])!,
-        ),
+        bounds: map['bounds'] != null
+            ? GeoCoordBounds(
+                northeast: _getGeoCoordFromMap(map['bounds']['northeast'])!,
+                southwest: _getGeoCoordFromMap(map['bounds']['southwest'])!,
+              )
+            : null,
         copyrights: map['copyrights'] as String?,
         legs: (map['legs'] as List?)?.mapList((_) => Leg.fromMap(_)),
         overviewPolyline: map['overview_polyline'] != null
