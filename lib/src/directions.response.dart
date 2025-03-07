@@ -31,10 +31,6 @@ GeoCoord? _getGeoCoordFromMap(Map<String, dynamic>? map) => map == null
 class DirectionsResult {
   const DirectionsResult({
     this.routes,
-    this.geocodedWaypoints,
-    this.status,
-    this.errorMessage,
-    this.availableTravelModes,
   });
 
   factory DirectionsResult.fromMap(Map<String, dynamic> map) =>
@@ -43,24 +39,9 @@ class DirectionsResult {
             ?.map((route) =>
                 DirectionsRoute.fromMap(route as Map<String, dynamic>))
             .toList(),
-        geocodedWaypoints: (map['geocoded_waypoints'] as List?)
-            ?.map((waypoint) =>
-                GeocodedWaypoint.fromMap(waypoint as Map<String, dynamic>))
-            .toList(),
-        status: map['reasonPhrase'] != null
-            ? DirectionsStatus(map['reasonPhrase'])
-            : null,
-        errorMessage: map['error_message'] as String?,
-        availableTravelModes: (map['available_travel_modes'] as List?)
-            ?.map((mode) => TravelMode(mode as String))
-            .toList(),
       );
 
   final List<DirectionsRoute>? routes;
-  final List<GeocodedWaypoint>? geocodedWaypoints;
-  final DirectionsStatus? status;
-  final String? errorMessage;
-  final List<TravelMode>? availableTravelModes;
 }
 
 /// When the Directions API returns results, it places them within a
