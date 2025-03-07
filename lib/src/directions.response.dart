@@ -29,19 +29,71 @@ GeoCoord? _getGeoCoordFromMap(Map<String, dynamic>? map) => map == null
 ///  * `errorMessages` contains more detailed information about the reasons
 /// behind the given status code.
 class DirectionsResult {
-  const DirectionsResult({
-    this.routes,
+  final List<Route> routes;
+
+  DirectionsResult({required this.routes});
+
+  factory DirectionsResult.fromMap(Map<String, dynamic> map) {
+    return DirectionsResult(
+      routes:
+          (map['routes'] as List).map((route) => Route.fromMap(route)).toList(),
+    );
+  }
+}
+
+class Route {
+  final List<Leg> legs;
+
+  Route({required this.legs});
+
+  factory Route.fromMap(Map<String, dynamic> map) {
+    return Route(
+      legs: (map['legs'] as List).map((leg) => Leg.fromMap(leg)).toList(),
+    );
+  }
+}
+
+class Leg {
+  final List<Step> steps;
+
+  Leg({required this.steps});
+
+  factory Leg.fromMap(Map<String, dynamic> map) {
+    return Leg(
+      steps: (map['steps'] as List).map((step) => Step.fromMap(step)).toList(),
+    );
+  }
+}
+
+class Step {
+  final LatLng startLocation;
+  final String navigationInstruction;
+
+  Step({
+    required this.startLocation,
+    required this.navigationInstruction,
   });
 
-  factory DirectionsResult.fromMap(Map<String, dynamic> map) =>
-      DirectionsResult(
-        routes: (map['routes'] as List?)
-            ?.map((route) =>
-                DirectionsRoute.fromMap(route as Map<String, dynamic>))
-            .toList(),
-      );
+  factory Step.fromMap(Map<String, dynamic> map) {
+    return Step(
+      startLocation: LatLng.fromMap(map['startLocation']),
+      navigationInstruction: map['navigationInstruction'] as String,
+    );
+  }
+}
 
-  final List<DirectionsRoute>? routes;
+class LatLng {
+  final double latitude;
+  final double longitude;
+
+  LatLng({required this.latitude, required this.longitude});
+
+  factory LatLng.fromMap(Map<String, dynamic> map) {
+    return LatLng(
+      latitude: (map['latitude'] as num).toDouble(),
+      longitude: (map['longitude'] as num).toDouble(),
+    );
+  }
 }
 
 /// When the Directions API returns results, it places them within a
@@ -408,384 +460,6 @@ class GeocodedWaypoint {
   /// the particular address component, for example, Lieu-dit in
   /// France.
   final List<String?>? types;
-}
-
-/// Each element in the legs array specifies a single leg of the
-/// journey from the origin to the destination in the calculated
-/// route. For routes that contain no waypoints, the route will
-/// consist of a single "leg," but for routes that define one or
-/// more waypoints, the route will consist of one or more legs,
-/// corresponding to the specific legs of the journey.
-///
-/// Each leg within the legs field(s) may contain the following
-/// fields:
-///
-///  * `steps` contains an array of steps denoting information
-/// about each separate step of the leg of the journey.
-/// (See [Step])
-///
-///  * `distance` indicates the total distance covered by this
-/// leg, as a field with the following elements:
-///   * `value` indicates the distance in meters
-///   * `text` contains a human-readable representation of the
-/// distance, displayed in units as used at the origin (or as
-/// overridden within the `units` parameter in the request).
-/// (For example, miles and feet will be used for any origin
-/// within the United States.) Note that regardless of what
-/// unit system is displayed as text, the `distance.value`
-/// field always contains a value expressed in meters.
-///
-///   These fields may be absent if the distance is unknown.
-///
-///
-///  * `duration` indicates the total duration of this leg,
-/// as a field with the following elements:
-///   * `value` indicates the duration in seconds.
-///   * `text` contains a human-readable representation of the
-/// duration.
-///
-///   These fields may be absent if the duration is unknown.
-///
-///
-///  * `durationInTraffic` indicates the total duration of this
-/// leg. This value is an estimate of the time in traffic based on
-/// current and historical traffic conditions. See the `trafficModel`
-/// request parameter for the options you can use to request that
-/// the returned value is optimistic, pessimistic, or a best-guess
-/// estimate. The duration in traffic is returned only if all of
-/// the following are true:
-///
-///   * The request includes a valid API key, or a valid Google Maps
-///   * Platform Premium Plan client ID and signature.
-///   * The request does not include stopover waypoints. If the
-/// request includes waypoints, they must be prefixed with `via:`
-/// to avoid stopovers.
-///   * The request is specifically for driving directions—the
-/// `mode` parameter is set to `driving`.
-///   * The request includes a `departureTime` parameter.
-///   * Traffic conditions are available for the requested route.
-///
-///   The `durationInTraffic` contains the following fields:
-///   * `value` indicates the duration in seconds.
-///   * `text` contains a human-readable representation of the duration.
-///
-///  * `arrivalTime` contains the estimated time of arrival for this
-/// leg. This property is only returned for transit directions. The
-/// result is returned as a [Time] object with three properties:
-///   * `value` the time specified as a [DateTime] object.
-///   * `text` the time specified as a [String]. The time is displayed
-/// in the time zone of the transit stop.
-///   * `timeZone` contains the time zone of this station. The value
-/// is the name of the time zone as defined in the [IANA Time Zone
-/// Database][iana], e.g. `"America/New_York"`.
-///
-///  * `departureTime` contains the estimated time of departure for
-/// this leg, specified as a [Time] object. The departureTime
-/// is only available for transit directions.
-///
-///  * `startLocation` contains the latitude/longitude coordinates
-/// of the origin of this leg. Because the Directions API calculates
-/// directions between locations by using the nearest transportation
-/// option (usually a road) at the start and end points,
-/// `startLocation` may be different than the provided origin of this
-/// leg if, for example, a road is not near the origin.
-///
-///  * `endLocation` contains the latitude/longitude coordinates of
-/// the given destination of this leg. Because the Directions API
-/// calculates directions between locations by using the nearest
-/// transportation option (usually a road) at the start and end points,
-/// `endLocation` may be different than the provided destination of
-/// this leg if, for example, a road is not near the destination.
-///
-///  * `startAddress` contains the human-readable address (typically
-/// a street address) resulting from reverse geocoding the
-/// `startLocation` of this leg.
-///
-///  * `endAddress` contains the human-readable address (typically a
-/// street address) from reverse geocoding the `endLocation` of
-/// this leg.
-///
-/// [iana]: http://www.iana.org/time-zones
-class Leg {
-  const Leg({
-    this.arrivalTime,
-    this.departureTime,
-    this.distance,
-    this.duration,
-    this.durationInTraffic,
-    this.endAddress,
-    this.endLocation,
-    this.startAddress,
-    this.startLocation,
-    this.steps,
-    this.viaWaypoint,
-  });
-
-  factory Leg.fromMap(Map<String, dynamic> map) => Leg(
-        arrivalTime: map['arrival_time'] != null
-            ? Time.fromMap(map['arrival_time'])
-            : null,
-        departureTime: map['departure_time'] != null
-            ? Time.fromMap(map['departure_time'])
-            : null,
-        distance:
-            map['distance'] != null ? Distance.fromMap(map['distance']) : null,
-        duration: map['duration'] != null
-            ? DirectionsDuration.fromMap(map['duration'])
-            : null,
-        durationInTraffic: map['duration_in_traffic'] != null
-            ? DirectionsDuration.fromMap(map['duration_in_traffic'])
-            : null,
-        endAddress: map['end_address'] as String?,
-        endLocation: _getGeoCoordFromMap(map['end_location']),
-        startAddress: map['start_address'] as String?,
-        startLocation: _getGeoCoordFromMap(map['start_location']),
-        steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        viaWaypoint: (map['via_waypoint'] as List?)
-            ?.mapList((_) => ViaWaypoint.fromMap(_)),
-      );
-
-  /// Contains the estimated time of arrival for this leg. This property
-  /// is only returned for transit directions. The result is returned as
-  /// a [Time] object with three properties:
-  ///   * `value` the time specified as a [DateTime] object.
-  ///   * `text` the time specified as a string. The time is displayed
-  /// in the time zone of the transit stop.
-  ///   * `timeZone` contains the time zone of this station. The value
-  /// is the name of the time zone as defined in the [IANA Time Zone
-  /// Database][iana], e.g. `"America/New_York"`.
-  final Time? arrivalTime;
-
-  /// Contains the estimated time of departure for
-  /// this leg, specified as a [Time] object. The departureTime
-  /// is only available for transit directions.
-  final Time? departureTime;
-
-  /// Indicates the total distance covered by this leg, as a
-  /// field with the following elements:
-  ///   * `value` indicates the distance in meters
-  ///   * `text` contains a human-readable representation of the
-  /// distance, displayed in units as used at the origin (or as
-  /// overridden within the `units` parameter in the request).
-  /// (For example, miles and feet will be used for any origin
-  /// within the United States.) Note that regardless of what
-  /// unit system is displayed as text, the `distance.value`
-  /// field always contains a value expressed in meters.
-  ///
-  /// These fields may be absent if the distance is unknown.
-  final Distance? distance;
-
-  /// Indicates the total duration of this leg, as a field with
-  /// the following elements:
-  ///   * `value` indicates the duration in seconds.
-  ///   * `text` contains a human-readable representation of the
-  /// duration.
-  ///
-  /// These fields may be absent if the duration is unknown.
-  final DirectionsDuration? duration;
-
-  /// Indicates the total duration of this leg. This value is an
-  /// estimate of the time in traffic based on current and historical
-  /// traffic conditions. See the `trafficModel` request parameter
-  /// for the options you can use to request that the returned value
-  /// is optimistic, pessimistic, or a best-guess estimate. The
-  /// duration in traffic is returned only if all of the following
-  /// are true:
-  ///
-  ///   * The request includes a valid API key, or a valid Google Maps
-  ///   * Platform Premium Plan client ID and signature.
-  ///   * The request does not include stopover waypoints. If the
-  /// request includes waypoints, they must be prefixed with `via:`
-  /// to avoid stopovers.
-  ///   * The request is specifically for driving directions—the
-  /// `mode` parameter is set to `driving`.
-  ///   * The request includes a `departureTime` parameter.
-  ///   * Traffic conditions are available for the requested route.
-  ///
-  ///   The `durationInTraffic` contains the following fields:
-  ///   * `value` indicates the duration in seconds.
-  ///   * `text` contains a human-readable representation of the duration.
-  final DirectionsDuration? durationInTraffic;
-
-  /// Contains the human-readable address (typically a street address)
-  /// from reverse geocoding the `endLocation` of this leg.
-  final String? endAddress;
-
-  /// Contains the latitude/longitude coordinates of the given
-  /// destination of this leg. Because the Directions API calculates
-  /// directions between locations by using the nearest transportation
-  /// option (usually a road) at the start and end points,
-  /// `endLocation` may be different than the provided destination of
-  /// this leg if, for example, a road is not near the destination.
-  final GeoCoord? endLocation;
-
-  /// Contains the human-readable address (typically a street address)
-  /// resulting from reverse geocoding the `startLocation` of this leg.
-  final String? startAddress;
-
-  /// Contains the latitude/longitude coordinates of the origin of this
-  /// leg. Because the Directions API calculates directions between
-  /// locations by using the nearest transportation option (usually a
-  /// road) at the start and end points, `startLocation` may be
-  /// different than the provided origin of this leg if, for example,
-  /// a road is not near the origin.
-  final GeoCoord? startLocation;
-
-  /// contains an array of steps denoting information about each
-  /// separate step of the leg of the journey.
-  final List<Step>? steps;
-
-  /// The locations of via waypoints along this leg.
-  /// contains info about points through which the route was laid
-  final List<ViaWaypoint>? viaWaypoint;
-}
-
-/// Each element in the steps array defines a single step of the
-/// calculated directions. A step is the most atomic unit of a
-/// direction's route, containing a single step describing a specific,
-/// single instruction on the journey. E.g. "Turn left at W. 4th St."
-/// The step not only describes the instruction but also contains
-/// distance and duration information relating to how this step
-/// relates to the following step. For example, a step denoted as
-/// "Merge onto I-80 West" may contain a duration of "37 miles" and
-/// "40 minutes," indicating that the next step is 37 miles/40
-/// minutes from this step.
-///
-/// When using the Directions API to search for transit directions,
-/// the steps array will include additional transit details in the
-/// form of a transit_details array. If the directions include
-/// multiple modes of transportation, detailed directions will be
-/// provided for walking or driving steps in an inner steps array.
-/// For example, a walking step will include directions from the
-/// start and end locations: "Walk to Innes Ave & Fitch St". That
-/// step will include detailed walking directions for that route
-/// in the inner steps array, such as: "Head north-west", "Turn
-/// left onto Arelious Walker", and "Turn left onto Innes Ave".
-///
-/// Each step within the steps field(s) may contain the following
-/// fields:
-///
-///  * `instructions` contains formatted instructions for this step,
-/// presented as a text string. (Corresponds to instructions in
-/// the [Directions.Step interface][directions_step_interface].)
-///
-///  * `distance` contains the distance covered by this step until
-/// the next step. (See the discussion of this field in Directions
-/// Legs above.) This field may be undefined if the distance is
-/// unknown.
-///
-///  * `duration` contains the typical time required to perform the
-/// step, until the next step. (See the description in Directions
-/// Legs above.) This field may be undefined if the duration is
-/// unknown.
-///
-///  * `startLocation` contains the location of the starting point
-/// of this step, as a single set of lat and lng fields.
-///
-///  * `endLocation` contains the location of the last point of this
-/// step, as a single set of lat and lng fields.
-///
-///  * `path` contains a sequence of GeoCoords describing the
-/// course of this step.
-///
-///  * `steps` contains detailed directions for walking or driving
-/// steps in transit directions. Substeps are only available when
-/// travelMode is set to "transit". The inner steps array is of
-/// the same type as steps.
-///
-///  * `transitDetails` contains transit specific information.
-/// This field is only returned with `travelMode` is set to
-/// "transit". See Transit Details below. (Corresponds to transit
-/// in the [Directions.Step interface][directions_step_interface].)
-///
-///  * `travelMode` contains the type of travel mode used.
-///
-/// [directions_step_interface]: https://developers.google.com/maps/documentation/javascript/reference/directions#DirectionsStep
-/// [enc_polyline]: https://developers.google.com/maps/documentation/utilities/polylinealgorithm
-class Step {
-  const Step({
-    this.distance,
-    this.duration,
-    this.endLocation,
-    this.instructions,
-    this.path,
-    this.startLocation,
-    this.steps,
-    this.transit,
-    this.travelMode,
-    this.polyline,
-    this.maneuver,
-  });
-
-  factory Step.fromMap(Map<String, dynamic> map) => Step(
-        distance:
-            map['distance'] != null ? Distance.fromMap(map['distance']) : null,
-        duration: map['duration'] != null
-            ? DirectionsDuration.fromMap(map['duration'])
-            : null,
-        endLocation: _getGeoCoordFromMap(map['end_location']),
-        startLocation: _getGeoCoordFromMap(map['start_location']),
-        instructions: map['html_instructions'] as String?,
-        path: (map['path'] as List?)?.mapList((_) => _getGeoCoordFromMap(_)),
-        steps: (map['steps'] as List?)?.mapList((_) => Step.fromMap(_)),
-        transit: map['transit_details'] != null
-            ? TransitDetails.fromMap(map['transit_details'])
-            : null,
-        travelMode:
-            map['travel_mode'] != null ? TravelMode(map['travel_mode']) : null,
-        polyline: map['polyline'] != null
-            ? OverviewPolyline.fromMap(map['polyline'])
-            : null,
-        maneuver: map['maneuver'] as String?,
-      );
-
-  /// Contains the distance covered by this step until the next
-  /// step. This field may be undefined if the distance is unknown.
-  final Distance? distance;
-
-  /// Contains the typical time required to perform the step,
-  /// until the next step. This field may be undefined if the
-  /// duration is unknown.
-  final DirectionsDuration? duration;
-
-  /// Contains the location of the last point of this step, as a
-  /// single set of lat and lng fields.
-  final GeoCoord? endLocation;
-
-  /// Contains the location of the starting point of this step, as
-  /// a single set of lat and lng fields.
-  final GeoCoord? startLocation;
-
-  /// Contains formatted instructions for this step,
-  /// presented as a text string. (Corresponds to instructions in
-  /// the [Directions.Step interface][directions_step_interface].)
-  final String? instructions;
-
-  /// Contains a sequence of GeoCoords describing the course of this step.
-  @Deprecated('Use polyline parameter instead')
-  final List<GeoCoord?>? path;
-
-  /// Contains detailed directions for walking or driving
-  /// steps in transit directions. Substeps are only available when
-  /// travelMode is set to "transit". The inner steps array is of
-  /// the same type as steps.
-  final List<Step>? steps;
-
-  /// Contains transit specific information.
-  /// This field is only returned with `travelMode` is set to
-  /// "transit". See Transit Details below. (Corresponds to transit
-  /// in the [Directions.Step interface][directions_step_interface].)
-  final TransitDetails? transit;
-
-  /// Contains the type of travel mode used.
-  final TravelMode? travelMode;
-
-  /// Contains a points describing the course of this step.
-  final OverviewPolyline? polyline;
-
-  /// Contains the action to take for the current step (turn left, merge,
-  /// straight, etc.).
-  final String? maneuver;
 }
 
 /// Transit directions return additional information that is not
