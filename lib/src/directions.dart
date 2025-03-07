@@ -83,7 +83,7 @@ class DirectionsService {
       }
 
       final result = DirectionsResult.fromMap(json.decode(response.body));
-      print('Request Body: $body');
+      print('Request Body: ${response.body}');
       callback(result, DirectionsStatus(response.reasonPhrase!));
     } catch (e) {
       print('Error fetching directions: $e');
