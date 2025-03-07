@@ -90,8 +90,8 @@ class Coordinates {
 
   factory Coordinates.fromMap(Map<String, dynamic> map) {
     return Coordinates(
-      latitude: (map['latitude'] as num).toDouble(),
-      longitude: (map['longitude'] as num).toDouble(),
+      latitude: (map['latLng']['latitude']).toDouble(),
+      longitude: (map['latLng']['longitude'] as num).toDouble(),
     );
   }
 }
