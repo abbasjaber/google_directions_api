@@ -76,7 +76,7 @@ class Step {
 
   factory Step.fromMap(Map<String, dynamic> map) {
     return Step(
-      startLocation: Coordinates.fromMap(map['startLocation']),
+      startLocation: Coordinates.fromMap(map['startLocation']['latLng']),
       navigationInstruction: map['navigationInstruction'] as String,
     );
   }
@@ -90,8 +90,8 @@ class Coordinates {
 
   factory Coordinates.fromMap(Map<String, dynamic> map) {
     return Coordinates(
-      latitude: map['latLng']['latitude'],
-      longitude: map['latLng']['longitude'],
+      latitude: map['latitude'],
+      longitude: map['longitude'],
     );
   }
 }
