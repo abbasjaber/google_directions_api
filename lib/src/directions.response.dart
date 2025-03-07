@@ -40,93 +40,24 @@ class DirectionsResult {
   factory DirectionsResult.fromMap(Map<String, dynamic> map) =>
       DirectionsResult(
         routes: (map['routes'] as List?)
-            ?.mapList((_) => DirectionsRoute.fromMap(_)),
-        geocodedWaypoints:
-            (map[''] as List?)?.mapList((_) => GeocodedWaypoint.fromMap(_)),
+            ?.map((route) =>
+                DirectionsRoute.fromMap(route as Map<String, dynamic>))
+            .toList(),
+        geocodedWaypoints: (map['geocoded_waypoints'] as List?)
+            ?.map((waypoint) =>
+                GeocodedWaypoint.fromMap(waypoint as Map<String, dynamic>))
+            .toList(),
         status: map['status'] != null ? DirectionsStatus(map['status']) : null,
         errorMessage: map['error_message'] as String?,
         availableTravelModes: (map['available_travel_modes'] as List?)
-            ?.mapList((_) => TravelMode(_)),
+            ?.map((mode) => TravelMode(mode as String))
+            .toList(),
       );
 
-  /// When the Directions API returns results, it places them within a
-  /// (JSON) routes array. Even if the service returns no results (such
-  /// as if the origin and/or destination doesn't exist) it still
-  /// returns an empty routes array. (XML responses consist of zero or
-  /// more <route> elements.)
-  ///
-  /// Each element of the routes array contains a single result from
-  /// the specified origin and destination. This route may consist of
-  /// one or more legs depending on whether any waypoints were specified.
-  /// As well, the route also contains copyright and warning information
-  /// which must be displayed to the user in addition to the routing
-  /// information.
   final List<DirectionsRoute>? routes;
-
-  /// Details about the geocoding of every waypoint, as well as origin
-  /// and destination, can be found in the (JSON) geocoded_waypoints
-  /// array. These can be used to infer why the service would return
-  /// unexpected or no routes.
-  ///
-  /// Elements in the geocoded_waypoints array correspond, by their
-  /// zero-based position, to the origin, the waypoints in the order
-  /// they are specified, and the destination.
   final List<GeocodedWaypoint>? geocodedWaypoints;
-
-  /// The status field within the Directions response object contains
-  /// the status of the request, and may contain debugging information
-  /// to help you track down why the Directions service failed. The
-  /// status field may contain the following values:
-  ///  * [DirectionsStatus.ok] indicates the response contains a valid
-  /// result.
-  ///  * [DirectionsStatus.notFound] indicates at least one of the
-  /// locations specified in the request's origin, destination, or
-  /// waypoints could not be geocoded.
-  ///  * [DirectionsStatus.zeroResults] indicates no route could be
-  /// found between the origin and destination.
-  ///  * [DirectionsStatus.maxWaypointExceeded] indicates that too
-  /// many waypoints were provided in the request. For applications
-  /// using the Directions API as a web service, or the [directions
-  /// service in the Maps JavaScript API][maps_js_api], the maximum
-  /// allowed number of waypoints is 25, plus the origin and destination.
-  ///  * [DirectionsStatus.maxRouteLengthExceeded] indicates the
-  /// requested route is too long and cannot be processed. This error
-  /// occurs when more complex directions are returned. Try reducing
-  /// the number of waypoints, turns, or instructions.
-  ///  * [DirectionsStatus.invalidRequest] indicates that the provided
-  /// request was invalid. Common causes of this status include an
-  /// invalid parameter or parameter value.
-  ///  * [DirectionsStatus.overDailyLimit] indicates any of the following:
-  ///     * The API key is missing or invalid.
-  ///     * Billing has not been enabled on your account.
-  ///     * A self-imposed usage cap has been exceeded.
-  ///     * The provided method of payment is no longer valid (for example,
-  /// a credit card has expired).
-  ///     * See the [Maps FAQ][faq] to learn how to fix this.
-  ///  * [DirectionsStatus.overQueryLimit] indicates the service has
-  /// received too many requests from your application within the
-  /// allowed time period.
-  ///  * [DirectionsStatus.requestDenied] indicates that the service
-  /// denied use of the directions service by your application.
-  ///  * [DirectionsStatus.unknownError] indicates a directions request
-  /// could not be processed due to a server error. The request may
-  /// succeed if you try again.
-  ///
-  /// [faq]: https://developers.google.com/maps/faq#over-limit-key-error
-  /// [maps_js_api]: https://developers.google.com/maps/documentation/javascript/directions
   final DirectionsStatus? status;
-
-  /// When the status code is other than OK, there may be an additional
-  /// `errorMessage` field within the Directions response object. This
-  /// field contains more detailed information about the reasons behind
-  /// the given status code.
   final String? errorMessage;
-
-  /// Contains an array of available travel modes. This field is returned
-  /// when a request specifies a travel mode and gets no results. The array
-  /// contains the available travel modes in the countries of the given set
-  /// of waypoints. This field is not returned if one or more of the
-  /// waypoints are via: waypoints. See details below.
   final List<TravelMode>? availableTravelModes;
 }
 
