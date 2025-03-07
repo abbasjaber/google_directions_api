@@ -196,19 +196,28 @@ class TravelMode {
 
   final String _name;
 
-  static final values = <TravelMode>[bicycling, driving, transit, walking];
+  static final values = <TravelMode>[
+    bicycling,
+    driving,
+    transit,
+    walking,
+    twoWeels
+  ];
 
   /// Specifies a bicycling directions request.
-  static const bicycling = TravelMode('BICYCLING');
+  static const bicycling = TravelMode('BICYCLE');
 
   /// Specifies a driving directions request.
-  static const driving = TravelMode('DRIVING');
+  static const driving = TravelMode('DRIVE');
 
   /// Specifies a transit directions request.
   static const transit = TravelMode('TRANSIT');
 
   /// Specifies a walking directions request.
-  static const walking = TravelMode('WALKING');
+  static const walking = TravelMode('WALK');
+
+  /// Specifies a twoWeels directions request.
+  static const twoWeels = TravelMode('TWO_WHEELER');
 
   @override
   int get hashCode => _name.hashCode;
